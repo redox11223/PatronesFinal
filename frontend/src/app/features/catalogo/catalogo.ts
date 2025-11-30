@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
@@ -10,9 +11,7 @@ import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { ProductoService } from '../../core/services/producto.service';
-import { PedidoService } from '../../core/services/pedido.service';
 import { Producto, ProductoCategorias } from '../../core/models/producto.model';
-import { Pedido, PedidoDetalle, Usuario } from '../../core/models/pedido.model';
 
 interface ItemPedido {
   producto: Producto;
@@ -64,8 +63,8 @@ export class CatalogoComponent implements OnInit {
 
   constructor(
     private productoService: ProductoService,
-    private pedidoService: PedidoService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -144,42 +143,14 @@ export class CatalogoComponent implements OnInit {
       return;
     }
 
-    const usuario: Usuario = {
-      id: this.selectedUsuario.id,
-      nombre: this.selectedUsuario.nombre,
-      email: this.selectedUsuario.email
+    const preOrden = {
+      usuario: this.selectedUsuario,
+      items: this.itemsPedido,
+      total: this.total
     };
 
-    const detalles: PedidoDetalle[] = this.itemsPedido.map(item => ({
-      producto: item.producto,
-      cantidad: item.cantidad,
-      precioUnitario: item.producto.precio,
-      subtotal: item.subtotal
-    }));
-
-    const pedido: Partial<Pedido> = {
-      usuario: usuario,
-      detalles: detalles
-    };
-    
-    this.pedidoService.create(pedido as Pedido).subscribe({
-      next: (response) => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Éxito',
-          detail: `Pedido #${response.data.id} creado correctamente`
-        });
-        this.limpiarPedido();
-      },
-      error: (err) => {
-        console.error('Error creando pedido:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: err.error?.message || 'Error al crear el pedido'
-        });
-      }
-    });
+    localStorage.setItem('preOrden', JSON.stringify(preOrden));
+    this.router.navigate(['/catalog/new-order']);
   }
 
   limpiarPedido(): void {
