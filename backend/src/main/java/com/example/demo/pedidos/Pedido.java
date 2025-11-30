@@ -1,5 +1,6 @@
 package com.example.demo.pedidos;
 
+import com.example.demo.pagos.Pago;
 import com.example.demo.usuarios.Usuario;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -43,6 +44,9 @@ public class Pedido {
   @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference
   private List<PedidoDetalle> detalles = new ArrayList<>();
+
+  @OneToOne(mappedBy = "pedido", cascade = CascadeType.ALL)
+  private Pago pago;
 
   @CreationTimestamp
   @Column(name="fecha_creacion", updatable = false)
