@@ -7,8 +7,12 @@ import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { ProductoService } from '../../core/services/producto.service';
+import { PedidoService } from '../../core/services/pedido.service';
 import { Producto, ProductoCategorias } from '../../core/models/producto.model';
+import { Pedido, PedidoDetalle, Usuario } from '../../core/models/pedido.model';
 
 interface ItemPedido {
   producto: Producto;
@@ -16,9 +20,10 @@ interface ItemPedido {
   subtotal: number;
 }
 
-interface Cliente {
+interface UsuarioSimple {
   id: number;
   nombre: string;
+  email?: string;
 }
 
 @Component({
@@ -31,18 +36,20 @@ interface Cliente {
     SelectModule,
     InputNumberModule,
     TagModule,
-    CardModule
+    CardModule,
+    ToastModule
   ],
+  providers: [MessageService],
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.css',
 })
 export class CatalogoComponent implements OnInit {
   productos: Producto[] = [];
   itemsPedido: ItemPedido[] = [];
-  clientes: Cliente[] = [];
+  usuarios: UsuarioSimple[] = [];
   
   selectedCategoria?: ProductoCategorias;
-  selectedCliente?: Cliente;
+  selectedUsuario?: UsuarioSimple;
   
   total = 0;
   loading = false;
@@ -55,11 +62,15 @@ export class CatalogoComponent implements OnInit {
     { label: 'Laptops', value: ProductoCategorias.LAPTOPS }
   ];
 
-  constructor(private productoService: ProductoService) {}
+  constructor(
+    private productoService: ProductoService,
+    private pedidoService: PedidoService,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     this.loadProductos();
-    this.loadClientes();
+    this.loadUsuarios();
   }
 
   loadProductos(): void {
@@ -76,12 +87,11 @@ export class CatalogoComponent implements OnInit {
     });
   }
 
-  loadClientes(): void {
-    // TODO: Implementar cuando esté el servicio de clientes
-    this.clientes = [
-      { id: 1, nombre: 'Cliente Demo 1' },
-      { id: 2, nombre: 'Cliente Demo 2' },
-      { id: 3, nombre: 'Cliente Demo 3' }
+  loadUsuarios(): void {
+    this.usuarios = [
+      { id: 1, nombre: 'Usuario Demo 1', email: 'usuario1@demo.com' },
+      { id: 2, nombre: 'Usuario Demo 2', email: 'usuario2@demo.com' },
+      { id: 3, nombre: 'Usuario Demo 3', email: 'usuario3@demo.com' }
     ];
   }
 
@@ -125,28 +135,56 @@ export class CatalogoComponent implements OnInit {
   }
 
   crearPedido(): void {
-    if (!this.selectedCliente || this.itemsPedido.length === 0) {
+    if (!this.selectedUsuario || this.itemsPedido.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'Seleccione un usuario y agregue productos al pedido'
+      });
       return;
     }
 
-    const pedido = {
-      clienteId: this.selectedCliente.id,
-      items: this.itemsPedido.map(item => ({
-        productoId: item.producto.id,
-        cantidad: item.cantidad,
-        precio: item.producto.precio
-      })),
-      total: this.total
+    const usuario: Usuario = {
+      id: this.selectedUsuario.id,
+      nombre: this.selectedUsuario.nombre,
+      email: this.selectedUsuario.email
+    };
+
+    const detalles: PedidoDetalle[] = this.itemsPedido.map(item => ({
+      producto: item.producto,
+      cantidad: item.cantidad,
+      precioUnitario: item.producto.precio,
+      subtotal: item.subtotal
+    }));
+
+    const pedido: Partial<Pedido> = {
+      usuario: usuario,
+      detalles: detalles
     };
     
-    console.log('Crear pedido:', pedido);
-    // TODO: Implementar servicio de pedidos
-    // this.pedidoService.create(pedido).subscribe(...)
+    this.pedidoService.create(pedido as Pedido).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: `Pedido #${response.data.id} creado correctamente`
+        });
+        this.limpiarPedido();
+      },
+      error: (err) => {
+        console.error('Error creando pedido:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error?.message || 'Error al crear el pedido'
+        });
+      }
+    });
   }
 
   limpiarPedido(): void {
     this.itemsPedido = [];
-    this.selectedCliente = undefined;
+    this.selectedUsuario = undefined;
     this.total = 0;
   }
 
