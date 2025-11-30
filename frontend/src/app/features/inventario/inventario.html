@@ -10,11 +10,11 @@
       />
       <p-button 
         severity="danger" 
-        label="Eliminar" 
-        icon="pi pi-trash" 
+        label="Descatalogar" 
+        icon="pi pi-ban" 
         outlined 
         (onClick)="deleteSelectedProducts()" 
-        [disabled]="!selectedProductos || !selectedProductos.length" 
+        [disabled]="!selectedProductos || !selectedProductos.length"
       />
     </ng-template>
 
@@ -139,11 +139,11 @@
             (click)="editProduct(producto)" 
           />
           <p-button 
-            icon="pi pi-trash" 
+            icon="pi pi-ban" 
             severity="danger" 
             [rounded]="true" 
             [outlined]="true" 
-            (click)="deleteProduct(producto)" 
+            (click)="deleteProduct(producto)"
           />
         </td>
       </tr>

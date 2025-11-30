@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { ProductoService } from '../../core/services/producto.service';
 import { Producto, ProductoCategorias } from '../../core/models/producto.model';
 
@@ -16,9 +19,10 @@ interface ItemPedido {
   subtotal: number;
 }
 
-interface Cliente {
+interface UsuarioSimple {
   id: number;
   nombre: string;
+  email?: string;
 }
 
 @Component({
@@ -31,18 +35,20 @@ interface Cliente {
     SelectModule,
     InputNumberModule,
     TagModule,
-    CardModule
+    CardModule,
+    ToastModule
   ],
+  providers: [MessageService],
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.css',
 })
 export class CatalogoComponent implements OnInit {
   productos: Producto[] = [];
   itemsPedido: ItemPedido[] = [];
-  clientes: Cliente[] = [];
+  usuarios: UsuarioSimple[] = [];
   
   selectedCategoria?: ProductoCategorias;
-  selectedCliente?: Cliente;
+  selectedUsuario?: UsuarioSimple;
   
   total = 0;
   loading = false;
@@ -55,11 +61,15 @@ export class CatalogoComponent implements OnInit {
     { label: 'Laptops', value: ProductoCategorias.LAPTOPS }
   ];
 
-  constructor(private productoService: ProductoService) {}
+  constructor(
+    private productoService: ProductoService,
+    private messageService: MessageService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadProductos();
-    this.loadClientes();
+    this.loadUsuarios();
   }
 
   loadProductos(): void {
@@ -76,12 +86,11 @@ export class CatalogoComponent implements OnInit {
     });
   }
 
-  loadClientes(): void {
-    // TODO: Implementar cuando esté el servicio de clientes
-    this.clientes = [
-      { id: 1, nombre: 'Cliente Demo 1' },
-      { id: 2, nombre: 'Cliente Demo 2' },
-      { id: 3, nombre: 'Cliente Demo 3' }
+  loadUsuarios(): void {
+    this.usuarios = [
+      { id: 1, nombre: 'Usuario Demo 1', email: 'usuario1@demo.com' },
+      { id: 2, nombre: 'Usuario Demo 2', email: 'usuario2@demo.com' },
+      { id: 3, nombre: 'Usuario Demo 3', email: 'usuario3@demo.com' }
     ];
   }
 
@@ -125,28 +134,28 @@ export class CatalogoComponent implements OnInit {
   }
 
   crearPedido(): void {
-    if (!this.selectedCliente || this.itemsPedido.length === 0) {
+    if (!this.selectedUsuario || this.itemsPedido.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'Seleccione un usuario y agregue productos al pedido'
+      });
       return;
     }
 
-    const pedido = {
-      clienteId: this.selectedCliente.id,
-      items: this.itemsPedido.map(item => ({
-        productoId: item.producto.id,
-        cantidad: item.cantidad,
-        precio: item.producto.precio
-      })),
+    const preOrden = {
+      usuario: this.selectedUsuario,
+      items: this.itemsPedido,
       total: this.total
     };
-    
-    console.log('Crear pedido:', pedido);
-    // TODO: Implementar servicio de pedidos
-    // this.pedidoService.create(pedido).subscribe(...)
+
+    localStorage.setItem('preOrden', JSON.stringify(preOrden));
+    this.router.navigate(['/catalog/new-order']);
   }
 
   limpiarPedido(): void {
     this.itemsPedido = [];
-    this.selectedCliente = undefined;
+    this.selectedUsuario = undefined;
     this.total = 0;
   }
 

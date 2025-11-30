@@ -60,7 +60,7 @@ export class InventarioComponent implements OnInit {
   estados = [
     { label: 'Disponible', value: ProductoEstado.DISPONIBLE },
     { label: 'Agotado', value: ProductoEstado.AGOTADO },
-    { label: 'Descontinuado', value: ProductoEstado.DESCONTINUADO }
+    { label: 'Descatalogado', value: ProductoEstado.DESCATALOGADO }
   ];
 
   constructor(
@@ -100,24 +100,67 @@ export class InventarioComponent implements OnInit {
 
   deleteProduct(producto: Producto): void {
     this.confirmationService.confirm({
-      message: `¿Está seguro de eliminar ${producto.nombre}?`,
-      header: 'Confirmar',
+      message: `¿Está seguro de descatalogar ${producto.nombre}? El producto pasará a estado DESCATALOGADO.`,
+      header: 'Confirmar Descatalogación',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        console.log('Eliminar producto:', producto.id);
-        // TODO: Implementar eliminación
+        const productoActualizado = { ...producto, estado: ProductoEstado.DESCATALOGADO };
+        this.productoService.update(producto.id!, productoActualizado).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Producto descatalogado correctamente'
+            });
+            this.loadProductos();
+          },
+          error: (err) => {
+            console.error('Error descatalogando producto:', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Error al descatalogar el producto'
+            });
+          }
+        });
       }
     });
   }
 
   deleteSelectedProducts(): void {
     this.confirmationService.confirm({
-      message: '¿Está seguro de eliminar los productos seleccionados?',
-      header: 'Confirmar',
+      message: '¿Está seguro de descatalogar los productos seleccionados? Pasarán a estado DESCATALOGADO.',
+      header: 'Confirmar Descatalogación Múltiple',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        console.log('Eliminar productos:', this.selectedProductos);
-        // TODO: Implementar eliminación múltiple
+        let completed = 0;
+        const total = this.selectedProductos.length;
+        
+        this.selectedProductos.forEach(producto => {
+          const productoActualizado = { ...producto, estado: ProductoEstado.DESCATALOGADO };
+          this.productoService.update(producto.id!, productoActualizado).subscribe({
+            next: () => {
+              completed++;
+              if (completed === total) {
+                this.messageService.add({
+                  severity: 'success',
+                  summary: 'Éxito',
+                  detail: `${total} producto(s) descatalogado(s) correctamente`
+                });
+                this.loadProductos();
+                this.selectedProductos = [];
+              }
+            },
+            error: (err) => {
+              console.error('Error descatalogando producto:', err);
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: `Error al descatalogar ${producto.nombre}`
+              });
+            }
+          });
+        });
       }
     });
   }
@@ -166,7 +209,7 @@ export class InventarioComponent implements OnInit {
         return 'success';
       case 'AGOTADO':
         return 'warn';
-      case 'DESCONTINUADO':
+      case 'DESCATALOGADO':
         return 'danger';
       default:
         return 'warn';

@@ -1,5 +1,6 @@
 <div class="grid grid-cols-12 gap-4 p-4 h-full">
-  <!-- Panel izquierdo: Catálogo de productos -->
+  <p-toast />
+
   <div class="col-span-8">
     <div class="card">
       <h2 class="text-2xl font-bold mb-4">Catálogo de Productos</h2>
@@ -81,14 +82,13 @@
     <div class="card sticky top-4">
       <h2 class="text-2xl font-bold mb-4">Nuevo Pedido</h2>
       
-      <!-- Selector de cliente -->
       <div class="mb-4">
-        <label class="block mb-2 font-medium">Cliente</label>
+        <label class="block mb-2 font-medium">Usuario</label>
         <p-select
-          [(ngModel)]="selectedCliente"
-          [options]="clientes"
+          [(ngModel)]="selectedUsuario"
+          [options]="usuarios"
           optionLabel="nombre"
-          placeholder="Seleccionar cliente"
+          placeholder="Seleccionar usuario"
           class="w-full"
         />
       </div>
@@ -165,7 +165,7 @@
           label="Crear Pedido"
           icon="pi pi-check"
           (onClick)="crearPedido()"
-          [disabled]="!selectedCliente || itemsPedido.length === 0"
+          [disabled]="!selectedUsuario || itemsPedido.length === 0"
           class="flex-1"
           severity="primary"
         />

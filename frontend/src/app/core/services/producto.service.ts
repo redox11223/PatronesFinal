@@ -48,8 +48,4 @@ export class ProductoService {
   update(id: number, producto: Producto): Observable<ApiResponse<Producto>> {
     return this.http.put<ApiResponse<Producto>>(`${this.apiUrl}/${id}`, producto);
   }
-
-  changeState(id: number, estado: string): Observable<ApiResponse<Producto>> {
-    return this.http.patch<ApiResponse<Producto>>(`${this.apiUrl}/${id}/estado`, { estado });
-  }
 }
