@@ -105,6 +105,15 @@
         <td>
           <div class="flex gap-2">
             <p-button
+              label="Ver"
+              icon="pi pi-eye"
+              [rounded]="true"
+              [text]="true"
+              severity="info"
+              (onClick)="verDetalle(pedido)"
+              pTooltip="Ver detalle"
+            />
+            <p-button
               icon="pi pi-times"
               [rounded]="true"
               [text]="true"

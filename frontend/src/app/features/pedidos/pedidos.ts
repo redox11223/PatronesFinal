@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -56,7 +57,8 @@ export class PedidosComponent implements OnInit {
   constructor(
     private pedidoService: PedidoService,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -91,6 +93,10 @@ export class PedidosComponent implements OnInit {
   clearFilters(): void {
     this.selectedEstado = undefined;
     this.loadPedidos();
+  }
+
+  verDetalle(pedido: Pedido): void {
+    this.router.navigate(['/orders', pedido.id]);
   }
 
   cancelarPedido(pedido: Pedido): void {
