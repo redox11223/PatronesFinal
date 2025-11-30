@@ -1,5 +1,6 @@
 package com.example.demo.usuarios;
 
+import com.example.demo.pedidos.Pedido;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +9,8 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -31,6 +34,9 @@ public class Usuario {
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "rol_id", nullable = false)
   private Rol rol;
+
+  @OneToMany(mappedBy = "usuario",cascade = CascadeType.ALL)
+  private List<Pedido> pedidos = new ArrayList<>();
 
   @CreationTimestamp
   @Column(name="fecha_creacion", updatable = false)
