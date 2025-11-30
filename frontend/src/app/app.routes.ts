@@ -21,6 +21,14 @@ export const routes: Routes = [
       {
         path: 'catalog',
         loadComponent: () => import('./features/catalogo/catalogo').then(m => m.CatalogoComponent)
+      },
+      {
+        path: 'orders',
+        loadComponent: () => import('./features/pedidos/pedidos').then(m => m.PedidosComponent)
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () => import('./features/pedidos/pedido-detalle/pedido-detalle').then(m => m.PedidoDetalleComponent)
       }
     ]
   }

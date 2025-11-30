@@ -1,0 +1,226 @@
+<div class="card p-4">
+  <p-toast />
+  <p-confirmDialog />
+
+  @if (loading) {
+    <div class="flex justify-center items-center h-64">
+      <i class="pi pi-spin pi-spinner text-4xl text-blue-500"></i>
+    </div>
+  }
+
+  @if (!loading && pedido) {
+    <!-- Header con botón volver -->
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h2 class="text-2xl font-bold">Detalle de pedidos</h2>
+      </div>
+      <p-button
+        label="Volver"
+        icon="pi pi-arrow-left"
+        (onClick)="volver()"
+        severity="secondary"
+        [outlined]="true"
+      />
+    </div>
+
+    <!-- Información del pedido -->
+    <div class="grid grid-cols-12 gap-4 mb-6">
+      <div class="col-span-12">
+        <div class="p-3 bg-gray-50 rounded border">
+          <div class="flex items-center gap-4">
+            <span>
+              <strong>Estado:</strong>
+              <p-tag
+                [value]="getEstadoLabel(pedido.estado)"
+                [severity]="getSeverity(pedido.estado)"
+                styleClass="ml-2"
+              />
+            </span>
+            <span class="ml-4">
+              <strong>Cliente:</strong> {{ pedido.usuario.nombre }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de productos con filtros -->
+    <div class="card p-4 mb-6">
+      <h3 class="text-xl font-bold mb-4">Detalle de pedidos</h3>
+
+      <!-- Filtros -->
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-4">
+          <p-select
+            [(ngModel)]="selectedProducto"
+            [options]="productos"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Producto"
+            class="w-full"
+          />
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <p-select
+            [(ngModel)]="selectedCategoria"
+            [options]="categorias"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Categoría"
+            class="w-full"
+          />
+        </div>
+      </div>
+
+      <!-- Tabla de productos -->
+      <p-table
+        [value]="detallesFiltrados"
+        [paginator]="true"
+        [rows]="7"
+        styleClass="p-datatable-striped"
+      >
+        <ng-template #header>
+          <tr>
+            <th>Producto</th>
+            <th class="text-right">Precio</th>
+            <th class="text-center">Cantidad</th>
+            <th class="text-right">Subtotal</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-detalle>
+          <tr>
+            <td>{{ detalle.producto?.nombre || 'Producto #' + detalle.producto?.id }}</td>
+            <td class="text-right">{{ detalle.precioUnitario | currency: 'USD' }}</td>
+            <td class="text-center">{{ detalle.cantidad }}</td>
+            <td class="text-right font-medium">{{ detalle.subtotal | currency: 'USD' }}</td>
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="4" class="text-center py-8">
+              <i class="pi pi-inbox text-4xl text-gray-400 mb-2"></i>
+              <p class="text-gray-500">No se encontraron productos</p>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <!-- Información de estrategia y total -->
+      <div class="mt-6 grid grid-cols-12 gap-4">
+        <div class="col-span-12 md:col-span-6">
+          <div class="p-4 bg-blue-50 border border-blue-200 rounded">
+            <p class="mb-2"><strong>Estrategia de precio:</strong></p>
+            <p class="mb-2">{{ getEstrategiaPrecio() }}</p>
+            <p class="mb-0">
+              <strong>Descuento aplicado:</strong> 
+              {{ pedido.descuento && pedido.descuento > 0 ? 'Sí' : 'No' }}
+            </p>
+            @if (pedido.descuento && pedido.descuento > 0) {
+              <p class="text-green-600 font-medium mt-2">
+                -{{ pedido.descuento | currency: 'USD' }}
+              </p>
+            }
+          </div>
+        </div>
+        
+        <div class="col-span-12 md:col-span-6">
+          <div class="p-4 bg-gray-50 border rounded">
+            <p class="text-2xl font-bold text-right">
+              <strong>Total pedido:</strong>
+              <span class="text-blue-600 ml-2">{{ pedido.total | currency: 'USD' }}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón cancelar -->
+      <div class="mt-4 text-right">
+        <p-button
+          label="Cancelar pedido"
+          icon="pi pi-times"
+          (onClick)="cancelarPedido()"
+          severity="danger"
+          [disabled]="pedido.estado === 'CANCELADO' || pedido.estado === 'COMPLETADO'"
+          styleClass="bg-black hover:bg-gray-800 border-black"
+        />
+      </div>
+    </div>
+
+    <!-- Historial de acciones -->
+    <div class="card p-4">
+      <h3 class="text-xl font-bold mb-4">Historial de Acciones</h3>
+
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-3">
+          <p class="mb-2"><strong>Pedido: ID</strong></p>
+          <p class="text-gray-600">#{{ pedido.id }}</p>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <p class="mb-2"><strong>Cliente:</strong></p>
+          <p class="text-gray-600">{{ pedido.usuario.nombre }}</p>
+        </div>
+        <div class="col-span-12 md:col-span-2">
+          <p-select
+            placeholder="Fecha"
+            [options]="[]"
+            class="w-full"
+            [disabled]="true"
+          />
+        </div>
+        <div class="col-span-12 md:col-span-2">
+          <p-select
+            placeholder="Usuario"
+            [options]="[]"
+            class="w-full"
+            [disabled]="true"
+          />
+        </div>
+        <div class="col-span-12 md:col-span-2">
+          <p-select
+            placeholder="Acción"
+            [options]="[]"
+            class="w-full"
+            [disabled]="true"
+          />
+        </div>
+      </div>
+
+      <!-- Tabla de historial -->
+      <p-table
+        [value]="historialAcciones"
+        [paginator]="true"
+        [rows]="3"
+        styleClass="p-datatable-striped"
+      >
+        <ng-template #header>
+          <tr>
+            <th>Fecha / Hora</th>
+            <th>Usuario</th>
+            <th>Acción Ejecutada</th>
+            <th>Detalle</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-accion>
+          <tr>
+            <td>{{ formatDate(accion.fecha) }}</td>
+            <td>{{ accion.usuario }}</td>
+            <td>{{ accion.accion }}</td>
+            <td>{{ accion.detalle }}</td>
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="4" class="text-center py-8">
+              <i class="pi pi-inbox text-4xl text-gray-400 mb-2"></i>
+              <p class="text-gray-500">No hay historial disponible</p>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  }
+</div>
