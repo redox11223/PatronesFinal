@@ -8,7 +8,7 @@ export enum ProductoCategorias {
 export enum ProductoEstado {
   DISPONIBLE = 'DISPONIBLE',
   AGOTADO = 'AGOTADO',
-  DESCONTINUADO = 'DESCONTINUADO'
+  DESCATALOGADO = 'DESCATALOGADO'
 }
 
 export interface Producto {
