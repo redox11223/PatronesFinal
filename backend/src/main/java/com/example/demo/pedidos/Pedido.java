@@ -1,5 +1,6 @@
 package com.example.demo.pedidos;
 
+import com.example.demo.clientes.Cliente;
 import com.example.demo.pagos.Pago;
 import com.example.demo.usuarios.Usuario;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -40,6 +41,11 @@ public class Pedido {
   @JoinColumn(name = "usuario_id", nullable = false)
   @NotNull(message = "El usuario no puede ser nulo")
   private Usuario usuario;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "cliente_id", nullable = false)
+  @NotNull(message = "El cliente no puede ser nulo")
+  private Cliente cliente;
 
   @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference
