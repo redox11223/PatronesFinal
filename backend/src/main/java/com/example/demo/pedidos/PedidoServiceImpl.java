@@ -1,5 +1,7 @@
 package com.example.demo.pedidos;
 
+import com.example.demo.clientes.Cliente;
+import com.example.demo.clientes.ClienteRepo;
 import com.example.demo.productos.Producto;
 import com.example.demo.productos.ProductoRepo;
 import com.example.demo.usuarios.Usuario;
@@ -17,6 +19,7 @@ public class PedidoServiceImpl implements PedidoService {
   private final PedidoRepo pedidoRepo;
   private final ProductoRepo productoRepo;
   private final UsuarioRepo usuarioRepo;
+  private final ClienteRepo clienteRepo;
 
   @Override
   @Transactional
@@ -24,7 +27,11 @@ public class PedidoServiceImpl implements PedidoService {
     Usuario usuario = usuarioRepo.findById(pedido.getUsuario().getId())
             .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con id: " + pedido.getUsuario().getId()));
 
+    Cliente cliente = clienteRepo.findById(pedido.getCliente().getId())
+            .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con id: " + pedido.getCliente().getId()));
+
     pedido.setUsuario(usuario);
+    pedido.setCliente(cliente);
     pedido.setEstado(PedidoEstado.PENDIENTE);
 
     if (pedido.getDetalles() == null || pedido.getDetalles().isEmpty()) {
