@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -66,11 +66,14 @@ export class InventarioComponent implements OnInit {
   constructor(
     private productoService: ProductoService,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.loadProductos();
+    setTimeout(() => {
+      this.loadProductos();
+    }, 0);
   }
 
   loadProductos(): void {
@@ -79,10 +82,12 @@ export class InventarioComponent implements OnInit {
       next: (response) => {
         this.productos = response.data.content;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Error cargando productos:', err);
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }

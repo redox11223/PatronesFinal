@@ -1,17 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DataViewModule } from 'primeng/dataview';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 import { ProductoService } from '../../core/services/producto.service';
-import { Producto, ProductoCategorias } from '../../core/models/producto.model';
+import { Producto, ProductoCategorias, ProductoEstado } from '../../core/models/producto.model';
 
 interface ItemPedido {
   producto: Producto;
@@ -19,24 +20,19 @@ interface ItemPedido {
   subtotal: number;
 }
 
-interface UsuarioSimple {
-  id: number;
-  nombre: string;
-  email?: string;
-}
-
 @Component({
   selector: 'app-catalogo',
   imports: [
     CommonModule,
     FormsModule,
-    DataViewModule,
+    TableModule,
     ButtonModule,
     SelectModule,
     InputNumberModule,
     TagModule,
     CardModule,
-    ToastModule
+    ToastModule,
+    TooltipModule
   ],
   providers: [MessageService],
   templateUrl: './catalogo.html',
@@ -45,10 +41,8 @@ interface UsuarioSimple {
 export class CatalogoComponent implements OnInit {
   productos: Producto[] = [];
   itemsPedido: ItemPedido[] = [];
-  usuarios: UsuarioSimple[] = [];
   
   selectedCategoria?: ProductoCategorias;
-  selectedUsuario?: UsuarioSimple;
   
   total = 0;
   loading = false;
@@ -64,34 +58,35 @@ export class CatalogoComponent implements OnInit {
   constructor(
     private productoService: ProductoService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.loadProductos();
-    this.loadUsuarios();
+    setTimeout(() => {
+      this.loadProductos();
+    }, 0);
   }
 
   loadProductos(): void {
     this.loading = true;
     this.productoService.getAll(0, 100, 'nombre', this.selectedCategoria).subscribe({
       next: (response) => {
-        this.productos = response.data.content.filter(p => p.stock > 0);
+        console.log('Productos recibidos:', response.data.content);
+        const todosLosProductos = response.data.content;
+        this.productos = todosLosProductos.filter(p => 
+          p.stock > 0 && p.estado === ProductoEstado.DISPONIBLE
+        );
+        console.log('Productos filtrados:', this.productos);
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Error cargando productos:', err);
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
-  }
-
-  loadUsuarios(): void {
-    this.usuarios = [
-      { id: 1, nombre: 'Usuario Demo 1', email: 'usuario1@demo.com' },
-      { id: 2, nombre: 'Usuario Demo 2', email: 'usuario2@demo.com' },
-      { id: 3, nombre: 'Usuario Demo 3', email: 'usuario3@demo.com' }
-    ];
   }
 
   filterByCategoria(): void {
@@ -134,17 +129,16 @@ export class CatalogoComponent implements OnInit {
   }
 
   crearPedido(): void {
-    if (!this.selectedUsuario || this.itemsPedido.length === 0) {
+    if (this.itemsPedido.length === 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Advertencia',
-        detail: 'Seleccione un usuario y agregue productos al pedido'
+        detail: 'Agregue productos al pedido'
       });
       return;
     }
 
     const preOrden = {
-      usuario: this.selectedUsuario,
       items: this.itemsPedido,
       total: this.total
     };
@@ -155,7 +149,6 @@ export class CatalogoComponent implements OnInit {
 
   limpiarPedido(): void {
     this.itemsPedido = [];
-    this.selectedUsuario = undefined;
     this.total = 0;
   }
 

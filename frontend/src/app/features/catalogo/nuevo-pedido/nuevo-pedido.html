@@ -10,14 +10,23 @@
 
   @if (!loading && preOrden) {
     <div class="mb-6">
-      <h2 class="text-2xl font-bold mb-4">Procesamiento de pedidos</h2>
+      <h2 class="text-2xl font-bold mb-4">Procesamiento de Pedido</h2>
       
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <strong>Estado:</strong> Creado
+          <label class="block mb-2 font-medium">Cliente *</label>
+          <p-select
+            [(ngModel)]="selectedCliente"
+            [options]="clientes"
+            optionLabel="nombre"
+            placeholder="Seleccionar cliente"
+            class="w-full"
+            [filter]="true"
+            filterBy="nombre"
+          />
         </div>
         <div>
-          <strong>Cliente:</strong> {{ preOrden.usuario.nombre }}
+          <strong>Estado:</strong> Nuevo Pedido
         </div>
       </div>
     </div>

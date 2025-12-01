@@ -11,8 +11,10 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { PedidoService } from '../../../core/services/pedido.service';
 import { MetodoPagoService } from '../../../core/services/metodo-pago.service';
-import { Pedido, PedidoDetalle, Usuario, EstadoPedido } from '../../../core/models/pedido.model';
+import { ClienteService } from '../../../core/services/cliente.service';
+import { Pedido, PedidoDetalle, EstadoPedido, Usuario } from '../../../core/models/pedido.model';
 import { MetodoPago } from '../../../core/models/metodo-pago.model';
+import { Cliente } from '../../../core/models/cliente.model';
 
 interface ItemPedido {
   producto: any;
@@ -21,7 +23,6 @@ interface ItemPedido {
 }
 
 interface PreOrden {
-  usuario: any;
   items: ItemPedido[];
   total: number;
 }
@@ -45,6 +46,8 @@ interface PreOrden {
 })
 export class NuevoPedidoComponent implements OnInit {
   preOrden?: PreOrden;
+  selectedCliente?: Cliente;
+  clientes: Cliente[] = [];
   metodoPago?: string;
   aplicarDescuento = false;
   descuentoMonto = 0;
@@ -55,6 +58,7 @@ export class NuevoPedidoComponent implements OnInit {
     private router: Router,
     private pedidoService: PedidoService,
     private metodoPagoService: MetodoPagoService,
+    private clienteService: ClienteService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) {}
@@ -62,6 +66,25 @@ export class NuevoPedidoComponent implements OnInit {
   ngOnInit(): void {
     this.loadPreOrden();
     this.loadMetodosPago();
+    this.loadClientes();
+  }
+
+  loadClientes(): void {
+    this.clienteService.getAll(0, 100, 'nombre').subscribe({
+      next: (response) => {
+        console.log('Respuesta clientes:', response);
+        this.clientes = response.data;
+        console.log('Clientes cargados:', this.clientes);
+      },
+      error: (err) => {
+        console.error('Error cargando clientes:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudieron cargar los clientes'
+        });
+      }
+    });
   }
 
   loadPreOrden(): void {
@@ -80,12 +103,16 @@ export class NuevoPedidoComponent implements OnInit {
   }
 
   loadMetodosPago(): void {
+    console.log('Iniciando carga de métodos de pago...');
     this.metodoPagoService.getAll().subscribe({
       next: (response) => {
+        console.log('Respuesta métodos de pago:', response);
         this.metodosPago = response.data.filter((m: MetodoPago) => m.activo);
+        console.log('Métodos de pago activos:', this.metodosPago);
       },
       error: (err) => {
         console.error('Error cargando métodos de pago:', err);
+        console.error('Detalles del error:', err.error);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -149,14 +176,21 @@ export class NuevoPedidoComponent implements OnInit {
   }
 
   confirmarProcesamiento(): void {
-    if (!this.preOrden) return;
+    if (!this.preOrden || !this.selectedCliente) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'Debe seleccionar un cliente'
+      });
+      return;
+    }
 
     this.loading = true;
 
     const usuario: Usuario = {
-      id: this.preOrden.usuario.id,
-      nombre: this.preOrden.usuario.nombre,
-      email: this.preOrden.usuario.email
+      id: this.selectedCliente.id!,
+      nombre: this.selectedCliente.nombre,
+      email: undefined
     };
 
     const detalles: PedidoDetalle[] = this.preOrden.items.map(item => ({
