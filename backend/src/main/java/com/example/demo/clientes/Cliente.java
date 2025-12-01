@@ -20,4 +20,7 @@ public class Cliente {
     @Column(nullable = false)
     @NotBlank( message = "El nombre no puede estar vacio" )
     private String nombre;
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+    private List<Pedido> pedidos = new ArrayList<>();
 }
