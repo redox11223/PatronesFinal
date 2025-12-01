@@ -1,0 +1,182 @@
+<div class="grid grid-cols-12 gap-4 p-4 h-full">
+  <p-toast />
+
+  <div class="col-span-8">
+    <div class="card">
+      <h2 class="text-2xl font-bold mb-4">Catálogo de Productos</h2>
+      
+      <!-- Filtros -->
+      <div class="flex gap-4 mb-4">
+        <div class="flex-1">
+          <label class="block mb-2 font-medium">Categoría</label>
+          <p-select
+            [(ngModel)]="selectedCategoria"
+            [options]="categorias"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccionar categoría"
+            (onChange)="filterByCategoria()"
+            class="w-full"
+          />
+        </div>
+      </div>
+
+      <!-- DataView de productos -->
+      <p-dataview
+        [value]="productos"
+        [rows]="10"
+        [paginator]="true"
+        [loading]="loading"
+        layout="grid"
+      >
+        <ng-template #grid let-producto>
+          <div class="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 p-2">
+            <div class="border border-gray-200 rounded-lg p-4 h-full flex flex-col">
+              <div class="flex-1">
+                <div class="flex justify-between items-start mb-2">
+                  <h3 class="font-bold text-lg">{{ producto.nombre }}</h3>
+                  <p-tag
+                    [value]="producto.categoria"
+                    [severity]="getSeverity(producto.stock)"
+                  />
+                </div>
+                
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                  {{ producto.descripcion || 'Sin descripción' }}
+                </p>
+                
+                <div class="space-y-1 mb-3">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Stock:</span>
+                    <span [class.text-red-500]="producto.stock <= (producto.stockminimo || 5)" 
+                          class="font-medium">
+                      {{ producto.stock }} unidades
+                    </span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Precio:</span>
+                    <span class="font-bold text-lg text-blue-600">
+                      {{ producto.precio | currency: 'USD' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <p-button
+                label="Agregar"
+                icon="pi pi-plus"
+                (onClick)="agregarAlPedido(producto)"
+                [disabled]="producto.stock === 0"
+                class="w-full"
+                severity="success"
+              />
+            </div>
+          </div>
+        </ng-template>
+      </p-dataview>
+    </div>
+  </div>
+
+  <!-- Panel derecho: Nuevo Pedido -->
+  <div class="col-span-4">
+    <div class="card sticky top-4">
+      <h2 class="text-2xl font-bold mb-4">Nuevo Pedido</h2>
+      
+      <div class="mb-4">
+        <label class="block mb-2 font-medium">Usuario</label>
+        <p-select
+          [(ngModel)]="selectedUsuario"
+          [options]="usuarios"
+          optionLabel="nombre"
+          placeholder="Seleccionar usuario"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Tabla de items del pedido -->
+      <div class="mb-4">
+        <h3 class="font-semibold mb-2">Items</h3>
+        
+        @if (itemsPedido.length === 0) {
+          <div class="text-center text-gray-500 py-8">
+            <i class="pi pi-shopping-cart text-4xl mb-2"></i>
+            <p>No hay productos en el pedido</p>
+          </div>
+        } @else {
+          <div class="border rounded-lg overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-2 py-2 text-left">Producto</th>
+                  <th class="px-2 py-2 text-center w-20">Cant.</th>
+                  <th class="px-2 py-2 text-right w-24">Subtotal</th>
+                  <th class="px-2 py-2 text-center w-12"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of itemsPedido; track item.producto.id) {
+                  <tr class="border-t">
+                    <td class="px-2 py-2 text-xs">{{ item.producto.nombre }}</td>
+                    <td class="px-2 py-2 text-center">
+                      <p-inputnumber
+                        [(ngModel)]="item.cantidad"
+                        [min]="1"
+                        [max]="item.producto.stock"
+                        [showButtons]="true"
+                        buttonLayout="horizontal"
+                        decrementButtonClass="p-button-text"
+                        incrementButtonClass="p-button-text"
+                        (ngModelChange)="actualizarCantidad(item)"
+                        inputStyleClass="w-12 text-center"
+                      />
+                    </td>
+                    <td class="px-2 py-2 text-right font-medium">
+                      {{ item.subtotal | currency: 'USD' }}
+                    </td>
+                    <td class="px-2 py-2 text-center">
+                      <button
+                        (click)="eliminarItem(item)"
+                        class="text-red-500 hover:text-red-700"
+                      >
+                        <i class="pi pi-trash text-sm"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- Total -->
+      <div class="border-t pt-4 mb-4">
+        <div class="flex justify-between items-center">
+          <span class="text-lg font-bold">Total:</span>
+          <span class="text-2xl font-bold text-blue-600">
+            {{ total | currency: 'USD' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="flex gap-2">
+        <p-button
+          label="Crear Pedido"
+          icon="pi pi-check"
+          (onClick)="crearPedido()"
+          [disabled]="!selectedUsuario || itemsPedido.length === 0"
+          class="flex-1"
+          severity="primary"
+        />
+        <p-button
+          icon="pi pi-times"
+          (onClick)="limpiarPedido()"
+          [disabled]="itemsPedido.length === 0"
+          severity="secondary"
+          [text]="true"
+        />
+      </div>
+    </div>
+  </div>
+</div>

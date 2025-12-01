@@ -1,0 +1,140 @@
+<div class="card p-4 max-w-5xl mx-auto">
+  <p-toast />
+  <p-confirmDialog />
+
+  @if (loading) {
+    <div class="flex justify-center items-center h-64">
+      <i class="pi pi-spin pi-spinner text-4xl text-blue-500"></i>
+    </div>
+  }
+
+  @if (!loading && preOrden) {
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold mb-4">Procesamiento de pedidos</h2>
+      
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <strong>Estado:</strong> Creado
+        </div>
+        <div>
+          <strong>Cliente:</strong> {{ preOrden.usuario.nombre }}
+        </div>
+      </div>
+    </div>
+
+    <p-table
+      [value]="preOrden.items"
+      [paginator]="true"
+      [rows]="10"
+      styleClass="p-datatable-striped mb-6"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Producto</th>
+          <th class="text-right">Precio</th>
+          <th class="text-center">Cantidad</th>
+          <th class="text-right">Subtotal</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-item>
+        <tr>
+          <td>{{ item.producto.nombre }}</td>
+          <td class="text-right">{{ item.producto.precio | currency: 'USD' }}</td>
+          <td class="text-center">{{ item.cantidad }}</td>
+          <td class="text-right font-medium">{{ item.subtotal | currency: 'USD' }}</td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="4" class="text-center py-8">
+            <i class="pi pi-inbox text-4xl text-gray-400 mb-2"></i>
+            <p class="text-gray-500">No hay productos</p>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div class="grid grid-cols-2 gap-6 mb-6">
+      <div>
+        <div class="mb-4">
+          <label class="block mb-2 font-medium">Método de pago</label>
+          <p-select
+            [(ngModel)]="metodoPago"
+            [options]="metodosPago"
+            optionLabel="nombre"
+            optionValue="nombre"
+            placeholder="Seleccionar método"
+            class="w-full"
+          />
+        </div>
+
+        <div class="p-4 bg-blue-50 border border-blue-200 rounded">
+          <p class="mb-2"><strong>Estrategia de precio:</strong></p>
+          <p class="mb-3">{{ estrategiaPrecio }}</p>
+
+          <div class="flex items-center gap-2">
+            <p-checkbox
+              [(ngModel)]="aplicarDescuento"
+              [binary]="true"
+              inputId="descuento"
+              (onChange)="onDescuentoChange()"
+            />
+            <label for="descuento" class="cursor-pointer">Aplicar descuento</label>
+          </div>
+
+          @if (aplicarDescuento) {
+            <div class="mt-3 p-3 bg-green-50 border border-green-200 rounded">
+              <p class="text-green-700 font-medium">
+                Descuento aplicado: -{{ descuentoMonto | currency: 'USD' }}
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div>
+        <div class="p-4 bg-gray-50 border rounded">
+          <p class="text-xl mb-2">
+            <strong>Subtotal:</strong>
+            <span class="float-right">{{ preOrden.total | currency: 'USD' }}</span>
+          </p>
+          
+          @if (aplicarDescuento && descuentoMonto > 0) {
+            <p class="text-lg text-green-600 mb-2">
+              <strong>Descuento:</strong>
+              <span class="float-right">-{{ descuentoMonto | currency: 'USD' }}</span>
+            </p>
+          }
+
+          <hr class="my-3">
+
+          <p class="text-2xl font-bold">
+            <strong>Total pedido:</strong>
+            <span class="text-blue-600 float-right">{{ totalFinal | currency: 'USD' }}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-4 justify-end">
+      <p-button
+        label="Procesar pedido"
+        icon="pi pi-check"
+        (onClick)="procesarPedido()"
+        [disabled]="!metodoPago"
+        severity="primary"
+        styleClass="bg-black hover:bg-gray-800 border-black px-6"
+      />
+      <p-button
+        label="Cancelar pedido"
+        icon="pi pi-times"
+        (onClick)="cancelarPedido()"
+        severity="danger"
+        [outlined]="true"
+        styleClass="border-black text-black hover:bg-gray-100 px-6"
+      />
+    </div>
+  }
+</div>

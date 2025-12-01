@@ -42,6 +42,21 @@
       ],
       "@spartan-ng/helm/collapsible": [
         "./src/app/core/layout/collapsible/src/index.ts"
+      ],
+      "@spartan-ng/helm/avatar": [
+        "./src/app/core/layout/avatar/src/index.ts"
+      ],
+      "@spartan-ng/avatar/avatar": [
+        "./src/app/core/layout/avatar/src/index.ts"
+      ],
+      "@spartan-ng/avatar/utils": [
+        "./src/app/core/layout/utils/src/index.ts"
+      ],
+      "@spartan-ng/avatar/dropdown-menu": [
+        "./frontend/src/app/core/layout/dropdown-menu/src/index.ts"
+      ],
+      "@spartan-ng/avatar/icon": [
+        "./frontend/src/app/core/layout/icon/src/index.ts"
       ]
     }
   },

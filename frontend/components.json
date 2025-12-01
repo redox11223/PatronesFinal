@@ -1,0 +1,4 @@
+{
+  "componentsPath": "frontend\\src\\app\\core\\layout",
+  "importAlias": "@spartan-ng/avatar"
+}
