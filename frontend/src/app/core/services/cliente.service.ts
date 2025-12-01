@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Cliente, ClientePage } from '../models/cliente.model';
-import { ApiResponse } from '../models/producto.model';
+import { ApiResponse } from '../models/api-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,13 +12,13 @@ export class ClienteService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(page: number = 0, size: number = 10, sortBy: string = 'nombre'): Observable<ApiResponse<ClientePage>> {
+  getAll(page: number = 0, size: number = 10, sortBy: string = 'nombre'): Observable<ApiResponse<Cliente[]>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
       .set('sortBy', sortBy);
 
-    return this.http.get<ApiResponse<ClientePage>>(this.apiUrl, { params });
+    return this.http.get<ApiResponse<Cliente[]>>(this.apiUrl, { params });
   }
 
   getById(id: number): Observable<ApiResponse<Cliente>> {
