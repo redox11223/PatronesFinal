@@ -1,0 +1,64 @@
+<div class="pricing-container">
+  <p-card header="Estrategias de Precio">
+    <div class="strategy-group">
+      <div class="strategy-option">
+        <p-radioButton 
+          name="strategy" 
+          value="STANDARD" 
+          [(ngModel)]="selectedStrategy" 
+          [disabled]="!canEdit"
+          inputId="standard">
+        </p-radioButton>
+        <label for="standard">Precio Estándar</label>
+      </div>
+      
+      <div class="strategy-option">
+        <p-radioButton 
+          name="strategy" 
+          value="DISCOUNT" 
+          [(ngModel)]="selectedStrategy" 
+          [disabled]="!canEdit"
+          inputId="discount">
+        </p-radioButton>
+        <label for="discount">Precio con Descuento</label>
+        <div class="field">
+          <label>Descuento (%)</label>
+          <input pInputText type="number" [(ngModel)]="discountPercentage" value="10" readonly />
+        </div>
+      </div>
+      
+      <div class="strategy-option">
+        <p-radioButton 
+          name="strategy" 
+          value="DYNAMIC" 
+          [(ngModel)]="selectedStrategy" 
+          [disabled]="!canEdit"
+          inputId="dynamic">
+        </p-radioButton>
+        <label for="dynamic">Precio Dinámico</label>
+        <div class="field">
+          <label>Alta demanda (Aumento de precio)</label>
+          <p-selectButton 
+            [options]="demandOptions" 
+            [(ngModel)]="selectedDemand" 
+            [disabled]="!canEdit"
+            optionLabel="label" 
+            optionValue="value">
+          </p-selectButton>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-4 flex justify-end">
+      <p-button 
+        label="Guardar Estrategia" 
+        icon="pi pi-save" 
+        [disabled]="!canEdit"
+        (onClick)="saveStrategy()">
+      </p-button>
+    </div>
+    
+    <p class="note">Nota: El descuento solo se aplicará si es seleccionado en el procesamiento de pedidos</p>
+  </p-card>
+  <p-toast />
+</div>

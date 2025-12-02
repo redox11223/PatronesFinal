@@ -1,0 +1,177 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #ffffff;
+  padding: 2rem;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 450px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo-container {
+  margin-bottom: 1rem;
+}
+
+.logo-container i {
+  color: #000000;
+}
+
+.login-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0.5rem 0;
+}
+
+.login-subtitle {
+  font-size: 1rem;
+  color: #666666;
+  margin: 0;
+}
+
+::ng-deep .login-card {
+  box-shadow: none;
+  border: none;
+}
+
+::ng-deep .login-card .p-card-body {
+  padding: 1.5rem;
+}
+
+::ng-deep .login-card .p-card-content {
+  padding: 0;
+}
+
+.card-header {
+  text-align: center;
+  padding: 1.5rem 0 1rem 0;
+}
+
+.card-header h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #000000;
+  margin: 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+p-iftalabel {
+  display: block;
+}
+
+p-iftalabel label {
+  font-weight: 500;
+  color: #000000;
+}
+
+::ng-deep .login-form input.p-inputtext,
+::ng-deep .login-form .p-password input {
+  height: 3rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #cccccc;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+::ng-deep .login-form input.p-inputtext:focus,
+::ng-deep .login-form .p-password input:focus {
+  border-color: #000000;
+  box-shadow: none;
+}
+
+::ng-deep .login-form .p-password {
+  width: 100%;
+}
+
+::ng-deep .login-form .p-password .p-inputtext {
+  width: 100% !important;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: -0.5rem;
+}
+
+.checkbox-label {
+  font-size: 0.95rem;
+  color: #000000;
+  cursor: pointer;
+  user-select: none;
+}
+
+::ng-deep .remember-me .p-checkbox {
+  width: 20px;
+  height: 20px;
+}
+
+::ng-deep .remember-me .p-checkbox .p-checkbox-box {
+  border-color: #cccccc;
+  background-color: #ffffff;
+}
+
+::ng-deep .remember-me .p-checkbox .p-checkbox-box.p-highlight {
+  border-color: #000000;
+  background-color: #000000;
+}
+
+::ng-deep .login-button {
+  height: 3rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border-radius: 4px;
+  background-color: #000000;
+  border: 1px solid #000000;
+  color: #ffffff;
+}
+
+::ng-deep .login-button:hover:not(:disabled) {
+  background-color: #333333;
+  border-color: #333333;
+}
+
+::ng-deep .login-button:disabled {
+  background-color: #cccccc;
+  border-color: #cccccc;
+  color: #666666;
+}
+
+::ng-deep .error-message {
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+.w-full {
+  width: 100%;
+}
+
+@media (max-width: 576px) {
+  .login-container {
+    padding: 1rem;
+  }
+
+  .login-title {
+    font-size: 2rem;
+  }
+
+  .login-content {
+    max-width: 100%;
+  }
+}
