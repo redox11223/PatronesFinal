@@ -1,0 +1,18 @@
+<p-card header="Configuración de Pasarelas">
+  <div class="pasarelas-section">
+    <h3>Pasarelas de Pago:</h3>
+    
+    <div *ngFor="let gateway of metodosPago" class="pasarela-item">
+      <span>{{gateway.nombre}}</span>
+      <p-checkbox 
+        [(ngModel)]="gateway.activo" 
+        [binary]="true"
+        [disabled]="!canEdit"
+        (onChange)="onToggle(gateway)">
+      </p-checkbox>
+      <span>{{ gateway.activo ? 'Activa' : 'Inactiva' }}</span>
+    </div>
+    
+    <p class="nota">Nota: El sistema sólo ofrecerá las pasarelas activadas.</p>
+  </div>
+</p-card>

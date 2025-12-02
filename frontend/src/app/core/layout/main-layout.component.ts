@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { HlmSidebarImports } from './sidebar/src/index';
 import { HlmCollapsibleImports } from './collapsible/src/index';
 import { HlmIconImports } from './icon/src/index';
@@ -7,6 +8,7 @@ import { HlmAvatarImports } from './avatar/src/index';
 import { HlmDropdownMenuImports } from './dropdown-menu/src/index';
 import { BrnMenuTriggerDirective } from '@spartan-ng/ui-menu-brain';
 import { provideIcons } from '@ng-icons/core';
+import { AuthService } from '../services/auth.service';
 import { 
   lucideHome, 
   lucidePackage, 
@@ -25,6 +27,7 @@ import {
   imports: [
     RouterOutlet,
     RouterLink,
+    CommonModule,
     HlmSidebarImports,
     HlmCollapsibleImports,
     HlmIconImports,
@@ -118,7 +121,7 @@ import {
                   </hlm-collapsible>
                 </li>
 
-                <li hlmSidebarMenuItem>
+                <li hlmSidebarMenuItem *ngIf="canViewConfig()">
                   <hlm-collapsible [expanded]="false" class="group/collapsible">
                     <button 
                       hlmCollapsibleTrigger 
@@ -135,15 +138,15 @@ import {
                     <hlm-collapsible-content>
                       <ul hlmSidebarMenuSub>
                         <li hlmSidebarMenuSubItem>
-                          <a hlmSidebarMenuSubButton routerLink="/reports">
-                            <ng-icon hlm name="lucideFileText" size="sm" />
-                            <span>Reportes</span>
+                          <a hlmSidebarMenuSubButton routerLink="/config/payments">
+                            <ng-icon hlm name="lucideSettings" size="sm" />
+                            <span>Pasarelas</span>
                           </a>
                         </li>
                         <li hlmSidebarMenuSubItem>
-                          <a hlmSidebarMenuSubButton routerLink="/config">
+                          <a hlmSidebarMenuSubButton routerLink="/config/pricing">
                             <ng-icon hlm name="lucideSettings" size="sm" />
-                            <span>Configuración</span>
+                            <span>Estrategias de Precio</span>
                           </a>
                         </li>
                       </ul>
@@ -161,11 +164,11 @@ import {
               <button hlmSidebarMenuButton [brnMenuTriggerFor]="userMenu">
                 <div class="flex items-center gap-2">
                   <hlm-avatar hlm variant="small">
-                    <span hlmAvatarFallback>JD</span>
+                    <span hlmAvatarFallback>{{ getUserInitials() }}</span>
                   </hlm-avatar>
                   <div class="flex flex-col items-start text-left flex-1">
-                    <span class="text-sm font-medium">Juan Pérez</span>
-                    <span class="text-xs text-muted-foreground">juan@techsolutions.com</span>
+                    <span class="text-sm font-medium">{{ getCurrentUsername() }}</span>
+                    <span class="text-xs text-muted-foreground">{{ getCurrentRol() }}</span>
                   </div>
                 </div>
                 <ng-icon 
@@ -204,8 +207,28 @@ import {
   styles: []
 })
 export class MainLayoutComponent {
+  constructor(private authService: AuthService) {}
+
+  canViewConfig(): boolean {
+    const rol = this.authService.getCurrentRol();
+    return rol === 'ADMIN' || rol === 'GERENTE';
+  }
+
+  getCurrentUsername(): string {
+    return this.authService.getCurrentUser() || 'Usuario';
+  }
+
+  getCurrentRol(): string {
+    return this.authService.getCurrentRol() || 'Sin rol';
+  }
+
+  getUserInitials(): string {
+    const username = this.authService.getCurrentUser();
+    if (!username) return 'U';
+    return username.substring(0, 2).toUpperCase();
+  }
+
   logout() {
-    console.log('Cerrando sesión...');
-    // TODO: Implementar lógica de logout
+    this.authService.logout();
   }
 }

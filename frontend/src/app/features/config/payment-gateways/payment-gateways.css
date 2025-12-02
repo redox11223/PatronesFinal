@@ -1,0 +1,25 @@
+.pasarelas-section {
+  padding: 20px;
+}
+
+h3 {
+  margin-bottom: 20px;
+}
+
+.pasarela-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pasarela-item span:first-child {
+  min-width: 100px;
+}
+
+.nota {
+  margin-top: 20px;
+  font-style: italic;
+  color: #666;
+}
+

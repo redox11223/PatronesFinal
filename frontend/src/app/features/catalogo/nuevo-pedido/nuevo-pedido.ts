@@ -12,6 +12,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { PedidoService } from '../../../core/services/pedido.service';
 import { MetodoPagoService } from '../../../core/services/metodo-pago.service';
 import { ClienteService } from '../../../core/services/cliente.service';
+import { PricingStrategyService } from '../../../core/services/pricing-strategy.service';
 import { Pedido, PedidoDetalle, EstadoPedido, Usuario } from '../../../core/models/pedido.model';
 import { MetodoPago } from '../../../core/models/metodo-pago.model';
 import { Cliente } from '../../../core/models/cliente.model';
@@ -49,7 +50,7 @@ export class NuevoPedidoComponent implements OnInit {
   selectedCliente?: Cliente;
   clientes: Cliente[] = [];
   metodoPago?: string;
-  aplicarDescuento = false;
+  aplicarEstrategia = false;
   descuentoMonto = 0;
   loading = false;
   metodosPago: MetodoPago[] = [];
@@ -59,6 +60,7 @@ export class NuevoPedidoComponent implements OnInit {
     private pedidoService: PedidoService,
     private metodoPagoService: MetodoPagoService,
     private clienteService: ClienteService,
+    private pricingStrategyService: PricingStrategyService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) {}
@@ -123,32 +125,33 @@ export class NuevoPedidoComponent implements OnInit {
   }
 
   get estrategiaPrecio(): string {
-    if (!this.aplicarDescuento || this.descuentoMonto === 0) {
-      return 'Precio estándar';
-    }
-
-    if (!this.preOrden) return 'Precio estándar';
-
-    const porcentaje = (this.descuentoMonto / this.preOrden.total) * 100;
-    
-    if (porcentaje >= 20) return 'Descuento Premium';
-    if (porcentaje >= 10) return 'Descuento Especial';
-    return 'Descuento Aplicado';
+    return this.pricingStrategyService.getStrategyDescription();
   }
 
   get totalFinal(): number {
     if (!this.preOrden) return 0;
-    return this.aplicarDescuento ? this.preOrden.total - this.descuentoMonto : this.preOrden.total;
+    
+    if (!this.aplicarEstrategia) {
+      return this.preOrden.total;
+    }
+
+    const percentage = this.pricingStrategyService.getDiscountOrIncreasePercentage();
+    const adjustment = this.preOrden.total * (percentage / 100);
+    return this.preOrden.total + adjustment;
   }
 
-  onDescuentoChange(): void {
-    if (!this.aplicarDescuento) {
-      this.descuentoMonto = 0;
-    } else {
-      if (this.preOrden) {
-        this.descuentoMonto = this.preOrden.total * 0.10;
-      }
-    }
+  get adjustmentAmount(): number {
+    if (!this.preOrden || !this.aplicarEstrategia) return 0;
+    const percentage = this.pricingStrategyService.getDiscountOrIncreasePercentage();
+    return this.preOrden.total * (percentage / 100);
+  }
+
+  get isDiscount(): boolean {
+    return this.adjustmentAmount < 0;
+  }
+
+  onEstrategiaChange(): void {
+    // Este método se llama cuando cambia el checkbox
   }
 
   procesarPedido(): void {
@@ -203,7 +206,7 @@ export class NuevoPedidoComponent implements OnInit {
     const pedido: Partial<Pedido> = {
       usuario: usuario,
       detalles: detalles,
-      descuento: this.aplicarDescuento ? this.descuentoMonto : 0,
+      descuento: this.aplicarEstrategia ? Math.abs(this.adjustmentAmount) : 0,
       estado: EstadoPedido.EN_PROCESO
     };
 
