@@ -25,7 +25,7 @@ public class ReporteController {
   }
 
   @GetMapping("/simple")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'GERENTE', 'CONTADOR', 'COMPRAS', 'VENDEDOR')")
   public ResponseEntity<ApiResponse<String>> getSimpleReport() {
     String reporte = reporteProxyService.generateSimpleReport();
     return ResponseEntity.ok(
