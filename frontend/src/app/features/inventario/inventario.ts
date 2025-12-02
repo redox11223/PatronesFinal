@@ -205,7 +205,6 @@ export class InventarioComponent implements OnInit {
 
   exportCSV(event: any): void {
     console.log('Exportar CSV', event);
-    // TODO: Implementar exportación
   }
 
   getSeverity(estado: string): 'success' | 'warn' | 'danger' {

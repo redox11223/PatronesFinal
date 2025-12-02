@@ -1,6 +1,8 @@
 package com.example.demo.usuarios;
 
 import com.example.demo.pedidos.Pedido;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,6 +18,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Usuario {
 
   @Id
@@ -26,6 +29,7 @@ public class Usuario {
   private String username;
 
   @Column(nullable = false)
+  @JsonIgnore
   private String password;
 
   @Column(nullable = false, unique = true)
@@ -36,6 +40,7 @@ public class Usuario {
   private Rol rol;
 
   @OneToMany(mappedBy = "usuario",cascade = CascadeType.ALL)
+  @JsonIgnore
   private List<Pedido> pedidos = new ArrayList<>();
 
   @CreationTimestamp

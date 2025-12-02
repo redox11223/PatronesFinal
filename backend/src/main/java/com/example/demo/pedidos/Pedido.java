@@ -4,6 +4,7 @@ import com.example.demo.clientes.Cliente;
 import com.example.demo.pagos.Pago;
 import com.example.demo.usuarios.Usuario;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -22,6 +23,7 @@ import java.util.List;
 @Getter @Setter
 @Entity
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Pedido {
 
   @Id

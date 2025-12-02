@@ -4,7 +4,6 @@
   
   <h2 class="text-2xl font-bold mb-4">Gestión de Pedidos</h2>
 
-  <!-- Filtros (solo estado, según backend) -->
   <div class="grid grid-cols-12 gap-4 mb-4">
     <div class="col-span-12 md:col-span-4">
       <label class="block mb-2 font-medium">Filtrar por Estado</label>
@@ -35,7 +34,6 @@
     </div>
   </div>
 
-  <!-- Tabla de pedidos (sin paginación backend, solo frontend) -->
   <p-table
     [value]="pedidosFiltrados"
     [loading]="loading"
@@ -130,7 +128,6 @@
           <td colspan="8">
             <div class="p-4 bg-gray-50 rounded">
               <div class="grid grid-cols-2 gap-6">
-                <!-- Items del pedido (detalles) -->
                 <div>
                   <h3 class="font-bold text-lg mb-3">Items del Pedido</h3>
                   <div class="border rounded-lg overflow-hidden bg-white">
@@ -183,7 +180,6 @@
                   </div>
                 </div>
 
-                <!-- Timeline de estados -->
                 <div>
                   <h3 class="font-bold text-lg mb-3">Historial de Estados</h3>
                   <p-timeline
@@ -217,7 +213,6 @@
                     </ng-template>
                   </p-timeline>
 
-                  <!-- Información adicional -->
                   <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
                     <p class="mb-1"><strong>Usuario:</strong> {{ getUsuarioNombre(pedido) }}</p>
                     <p class="mb-1"><strong>Creado:</strong> {{ formatDate(pedido.fechaCreacion || '') }}</p>

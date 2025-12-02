@@ -9,7 +9,6 @@
   }
 
   @if (!loading && pedido) {
-    <!-- Header con botón volver -->
     <div class="flex justify-between items-center mb-4">
       <div>
         <h2 class="text-2xl font-bold">Detalle de pedidos</h2>
@@ -23,7 +22,6 @@
       />
     </div>
 
-    <!-- Información del pedido -->
     <div class="grid grid-cols-12 gap-4 mb-6">
       <div class="col-span-12">
         <div class="p-3 bg-gray-50 rounded border">
@@ -37,18 +35,16 @@
               />
             </span>
             <span class="ml-4">
-              <strong>Cliente:</strong> {{ pedido.usuario.nombre }}
+              <strong>Cliente:</strong> {{ pedido.cliente.nombre || 'N/A' }}
             </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tabla de productos con filtros -->
     <div class="card p-4 mb-6">
       <h3 class="text-xl font-bold mb-4">Detalle de pedidos</h3>
 
-      <!-- Filtros -->
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-4">
           <p-select
@@ -72,7 +68,6 @@
         </div>
       </div>
 
-      <!-- Tabla de productos -->
       <p-table
         [value]="detallesFiltrados"
         [paginator]="true"
@@ -107,7 +102,6 @@
         </ng-template>
       </p-table>
 
-      <!-- Información de estrategia y total -->
       <div class="mt-6 grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-6">
           <div class="p-4 bg-blue-50 border border-blue-200 rounded">
@@ -135,7 +129,6 @@
         </div>
       </div>
 
-      <!-- Botón cancelar -->
       <div class="mt-4 text-right">
         <p-button
           label="Cancelar pedido"
@@ -148,7 +141,6 @@
       </div>
     </div>
 
-    <!-- Historial de acciones -->
     <div class="card p-4">
       <h3 class="text-xl font-bold mb-4">Historial de Acciones</h3>
 
@@ -159,7 +151,7 @@
         </div>
         <div class="col-span-12 md:col-span-3">
           <p class="mb-2"><strong>Cliente:</strong></p>
-          <p class="text-gray-600">{{ pedido.usuario.nombre }}</p>
+          <p class="text-gray-600">{{ pedido.cliente.nombre }}</p>
         </div>
         <div class="col-span-12 md:col-span-2">
           <p-select
@@ -187,7 +179,6 @@
         </div>
       </div>
 
-      <!-- Tabla de historial -->
       <p-table
         [value]="historialAcciones"
         [paginator]="true"
