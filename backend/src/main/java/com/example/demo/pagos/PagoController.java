@@ -17,7 +17,7 @@ public class PagoController {
   private final PagoService pagoService;
 
   @PostMapping
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'GERENTE', 'CONTADOR', 'COMPRAS', 'VENDEDOR')")
   public ResponseEntity<ApiResponse<Pago>> procesarPago(@Valid @RequestBody Pago pago) {
     Pago nuevoPago = pagoService.procesarPago(pago);
     return ResponseEntity.status(201).body(
@@ -26,7 +26,7 @@ public class PagoController {
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'GERENTE', 'CONTADOR', 'COMPRAS', 'VENDEDOR')")
   public ResponseEntity<ApiResponse<Pago>> obtenerPagoPorId(@PathVariable Long id) {
     Pago pago = pagoService.getPagoById(id);
     return ResponseEntity.ok(
@@ -35,7 +35,7 @@ public class PagoController {
   }
 
   @GetMapping("/pedido/{pedidoId}")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'GERENTE', 'CONTADOR', 'COMPRAS', 'VENDEDOR')")
   public ResponseEntity<ApiResponse<Pago>> obtenerPagoPorPedido(@PathVariable Long pedidoId) {
     Pago pago = pagoService.getPagoByPedidoId(pedidoId);
     return ResponseEntity.ok(

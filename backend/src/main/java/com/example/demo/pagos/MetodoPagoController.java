@@ -26,7 +26,7 @@ public class MetodoPagoController {
   }
 
   @GetMapping
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'GERENTE', 'CONTADOR', 'COMPRAS', 'VENDEDOR')")
   public ResponseEntity<ApiResponse<List<MetodoPago>>> obtenerTodosMetodosPago() {
     List<MetodoPago> metodosPago = metodoPagoService.getAllMetodosPago();
     return ResponseEntity.ok(
