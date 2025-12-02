@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -42,10 +42,8 @@ export class PedidosComponent implements OnInit {
   
   loading = false;
   
-  // Filtro de estado (backend soporta filtro por estado)
   selectedEstado?: EstadoPedido;
   
-  // Estados según backend - NO MODIFICAR
   estados = [
     { label: 'Todos', value: undefined },
     { label: 'Pendiente', value: EstadoPedido.PENDIENTE },
@@ -58,7 +56,8 @@ export class PedidosComponent implements OnInit {
     private pedidoService: PedidoService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -73,6 +72,7 @@ export class PedidosComponent implements OnInit {
         this.pedidos = response.data;
         this.pedidosFiltrados = response.data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error cargando pedidos:', err);
@@ -100,7 +100,6 @@ export class PedidosComponent implements OnInit {
   }
 
   cancelarPedido(pedido: Pedido): void {
-    // Validaciones según lógica del backend
     if (pedido.estado === EstadoPedido.COMPLETADO) {
       this.messageService.add({ 
         severity: 'warn', 
@@ -174,7 +173,6 @@ export class PedidosComponent implements OnInit {
   }
 
   getHistorialMock(pedido: Pedido): HistorialEstado[] {
-    // Mock data - historial simplificado según estados del backend
     const historial: HistorialEstado[] = [
       { estado: EstadoPedido.PENDIENTE, fecha: pedido.fechaCreacion || '' }
     ];

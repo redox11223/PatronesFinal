@@ -74,16 +74,21 @@ export class NuevoPedidoComponent implements OnInit {
   loadClientes(): void {
     this.clienteService.getAll(0, 100, 'nombre').subscribe({
       next: (response) => {
-        console.log('Respuesta clientes:', response);
         this.clientes = response.data;
-        console.log('Clientes cargados:', this.clientes);
+        
+        if (!this.clientes || this.clientes.length === 0) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Advertencia',
+            detail: 'No hay clientes registrados en el sistema'
+          });
+        }
       },
       error: (err) => {
-        console.error('Error cargando clientes:', err);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'No se pudieron cargar los clientes'
+          detail: 'No se pudieron cargar los clientes: ' + (err.error?.message || err.message)
         });
       }
     });
@@ -105,16 +110,11 @@ export class NuevoPedidoComponent implements OnInit {
   }
 
   loadMetodosPago(): void {
-    console.log('Iniciando carga de métodos de pago...');
     this.metodoPagoService.getAll().subscribe({
       next: (response) => {
-        console.log('Respuesta métodos de pago:', response);
         this.metodosPago = response.data.filter((m: MetodoPago) => m.activo);
-        console.log('Métodos de pago activos:', this.metodosPago);
       },
       error: (err) => {
-        console.error('Error cargando métodos de pago:', err);
-        console.error('Detalles del error:', err.error);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -151,7 +151,6 @@ export class NuevoPedidoComponent implements OnInit {
   }
 
   onEstrategiaChange(): void {
-    // Este método se llama cuando cambia el checkbox
   }
 
   procesarPedido(): void {
@@ -191,26 +190,38 @@ export class NuevoPedidoComponent implements OnInit {
     this.loading = true;
 
     const usuario: Usuario = {
-      id: this.selectedCliente.id!,
+      id: 1,
       nombre: this.selectedCliente.nombre,
       email: undefined
     };
 
+    const cliente: Cliente = {
+      id: this.selectedCliente.id,
+      nombre: this.selectedCliente.nombre
+    };
+
+    // Detalles del pedido
     const detalles: PedidoDetalle[] = this.preOrden.items.map(item => ({
-      producto: item.producto,
+      producto: { id: item.producto.id } as any,
       cantidad: item.cantidad,
       precioUnitario: item.producto.precio,
       subtotal: item.subtotal
     }));
 
-    const pedido: Partial<Pedido> = {
+    const totalSinDescuento = this.preOrden.total;
+    const descuentoAplicado = this.aplicarEstrategia ? Math.abs(this.adjustmentAmount) : 0;
+    const totalFinal = totalSinDescuento - descuentoAplicado;
+
+    const pedido: Pedido = {
+      total: totalFinal,
+      estado: EstadoPedido.PENDIENTE,
       usuario: usuario,
+      cliente: cliente,
       detalles: detalles,
-      descuento: this.aplicarEstrategia ? Math.abs(this.adjustmentAmount) : 0,
-      estado: EstadoPedido.EN_PROCESO
+      descuento: descuentoAplicado
     };
 
-    this.pedidoService.create(pedido as Pedido).subscribe({
+    this.pedidoService.create(pedido).subscribe({
       next: (response) => {
         this.messageService.add({
           severity: 'success',
@@ -223,11 +234,19 @@ export class NuevoPedidoComponent implements OnInit {
         }, 1500);
       },
       error: (err) => {
-        console.error('Error procesando pedido:', err);
+        let errorMessage = 'Error al procesar el pedido';
+        
+        if (err.error?.message) {
+          errorMessage = err.error.message;
+        } else if (err.error?.errors) {
+          const validationErrors = err.error.errors;
+          errorMessage = Object.values(validationErrors).join(', ');
+        }
+        
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: err.error?.message || 'Error al procesar el pedido'
+          detail: errorMessage
         });
         this.loading = false;
       }

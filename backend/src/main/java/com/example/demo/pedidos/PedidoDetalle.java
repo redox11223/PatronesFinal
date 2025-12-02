@@ -2,6 +2,7 @@ package com.example.demo.pedidos;
 
 import com.example.demo.productos.Producto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -14,6 +15,7 @@ import lombok.Setter;
 @Getter @Setter
 @Entity
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class PedidoDetalle {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

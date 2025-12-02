@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -34,11 +34,9 @@ export class PedidoDetalleComponent implements OnInit {
   pedido?: Pedido;
   loading = false;
   
-  // Filtros para la tabla de productos
   selectedProducto?: string;
   selectedCategoria?: ProductoCategorias;
   
-  // Opciones de filtros (simples para la UI)
   productos: { label: string; value: string }[] = [];
   categorias = [
     { label: 'Todas', value: undefined },
@@ -48,7 +46,6 @@ export class PedidoDetalleComponent implements OnInit {
     { label: 'Laptops', value: ProductoCategorias.LAPTOPS }
   ];
 
-  // Historial de acciones (mock - backend no tiene este endpoint)
   historialAcciones: any[] = [];
 
   constructor(
@@ -56,7 +53,8 @@ export class PedidoDetalleComponent implements OnInit {
     private router: Router,
     private pedidoService: PedidoService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -76,7 +74,6 @@ export class PedidoDetalleComponent implements OnInit {
         this.pedido = response.data;
         this.loading = false;
         
-        // Generar opciones de productos basados en los detalles
         if (this.pedido.detalles) {
           this.productos = [
             { label: 'Todos', value: '' },
@@ -87,8 +84,8 @@ export class PedidoDetalleComponent implements OnInit {
           ];
         }
         
-        // Generar historial mock
         this.generateHistorialMock();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error cargando pedido:', err);
@@ -149,14 +146,12 @@ export class PedidoDetalleComponent implements OnInit {
     
     let detalles = [...this.pedido.detalles];
     
-    // Filtrar por producto
     if (this.selectedProducto) {
       detalles = detalles.filter(d => 
         d.producto?.nombre?.toLowerCase().includes(this.selectedProducto!.toLowerCase())
       );
     }
     
-    // Filtrar por categoría
     if (this.selectedCategoria) {
       detalles = detalles.filter(d => 
         d.producto?.categoria === this.selectedCategoria
@@ -169,7 +164,6 @@ export class PedidoDetalleComponent implements OnInit {
   cancelarPedido(): void {
     if (!this.pedido) return;
 
-    // Validaciones según backend
     if (this.pedido.estado === EstadoPedido.COMPLETADO) {
       this.messageService.add({
         severity: 'warn',
@@ -203,6 +197,7 @@ export class PedidoDetalleComponent implements OnInit {
               detail: 'Pedido cancelado correctamente. Stock devuelto.'
             });
             this.loadPedido(this.pedido!.id!);
+            this.cdr.detectChanges();
           },
           error: (err) => {
             console.error('Error cancelando pedido:', err);
@@ -258,7 +253,6 @@ export class PedidoDetalleComponent implements OnInit {
   }
 
   getEstrategiaPrecio(): string {
-    // Determinar estrategia según descuento
     if (!this.pedido?.descuento || this.pedido.descuento === 0) {
       return 'Precio estándar';
     }

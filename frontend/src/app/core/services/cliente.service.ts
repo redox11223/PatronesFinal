@@ -13,12 +13,7 @@ export class ClienteService {
   constructor(private http: HttpClient) {}
 
   getAll(page: number = 0, size: number = 10, sortBy: string = 'nombre'): Observable<ApiResponse<Cliente[]>> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString())
-      .set('sortBy', sortBy);
-
-    return this.http.get<ApiResponse<Cliente[]>>(this.apiUrl, { params });
+    return this.http.get<ApiResponse<Cliente[]>>(this.apiUrl);
   }
 
   getById(id: number): Observable<ApiResponse<Cliente>> {
